@@ -1,0 +1,111 @@
+
+networks:
+  hadoop-network:
+    driver: bridge
+
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    restart: always
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+      - ./data:/data
+      - ./scripts:/scripts
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    networks:
+      - hadoop-network
+
+  datanode1:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode1
+    restart: always
+    ports:
+      - "9865:9864"
+      - "9867:9866"
+    volumes:
+      - hadoop_datanode1:/hadoop/dfs/data
+      - ./data:/data
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_datanode_name_dir=/hadoop/dfs/data
+      - HDFS_CONF_dfs_datanode_data_dir=/hadoop/dfs/data
+    depends_on:
+      - namenode
+    networks:
+      - hadoop-network
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2
+    restart: always
+    ports:
+      - "9868:9864"
+      - "9869:9866"
+    volumes:
+      - hadoop_datanode2:/hadoop/dfs/data
+      - ./data:/data
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_datanode_name_dir=/hadoop/dfs/data
+      - HDFS_CONF_dfs_datanode_data_dir=/hadoop/dfs/data
+    depends_on:
+      - namenode
+    networks:
+      - hadoop-network
+
+  datanode3:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode3
+    restart: always
+    ports:
+      - "9871:9864"
+      - "9872:9866"
+    volumes:
+      - hadoop_datanode3:/hadoop/dfs/data
+      - ./data:/data
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_datanode_name_dir=/hadoop/dfs/data
+      - HDFS_CONF_dfs_datanode_data_dir=/hadoop/dfs/data
+    depends_on:
+      - namenode
+    networks:
+      - hadoop-network
+
+  spark:
+    image: apache/spark:3.5.5-scala2.12-java11-python3-r-ubuntu
+    container_name: spark
+    restart: always
+    ports:
+      - "4040:4040"
+      - "7077:7077"
+    volumes:
+      - ./spark-app:/app
+      - ./scripts:/scripts
+      - ./results:/results
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - SPARK_MASTER_HOST=spark
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_WEBUI_PORT=8080
+      - SPARK_MASTER_OPTS="-Dspark.deploy.defaultCores=2"
+    command: "/bin/bash -c '/opt/spark/sbin/start-master.sh & tail -f /dev/null'"
+    networks:
+      - hadoop-network
+    depends_on:
+      - namenode
+      - datanode1
+      - datanode2
+      - datanode3
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode1:
+  hadoop_datanode2:
+  hadoop_datanode3:
