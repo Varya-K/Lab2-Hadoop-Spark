@@ -67,7 +67,8 @@ docker-compose -f файл_compose.yml down -v
 
 На моем компьютере команды 1 и 2 выполняются успешно. Однако 3 шаг выдает ошибку, связанную с тем, что Spark испытывает сложности с выделением и использованием вычислительных ресурсов (ядер/потоков) для экзекьютора при обработке данных из HDFS: WARN TaskSchedulerImpl: Initial job has not accepted any resources; check your cluster UI to ensure that workers are registered and have sufficient resources. На следующем скрине видно, что для экзекьютора не было выделено ядер для выполнения:
 
-![image.png](image.png)
+![image](https://github.com/user-attachments/assets/c11fa877-5f54-4cda-9330-6b23450100b6)
+
 
 Я использовала разные образы для Spark: bde2020 и apache/spark, но проблема не пропадала.
 
